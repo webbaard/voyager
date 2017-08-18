@@ -54,7 +54,7 @@ final class IceHawkDiscoConfigDelegate implements ConfiguresIceHawk
         return $this->beanFactory->get('finalWriteResponder');
     }
 
-    public function getRequestBypasses(): BypassesRequest
+    public function getRequestBypasses(): array
     {
         return $this->beanFactory->get('getRequestBypasses');
     }
