@@ -13,7 +13,9 @@
         "icehawk/icehawk": "^2.1",
         "icehawk/forms": "^1.0",
         "icehawk/session": "^1.1",
-        "icehawk/pubsub": "^1.0"
+        "icehawk/pubsub": "^1.0",
+        "auth0/auth0-php": "^5.0",
+        "bitexpert/disco": "^0.8.0"
     },
     "authors": [
         {
