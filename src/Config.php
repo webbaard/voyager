@@ -27,6 +27,7 @@ use bitExpert\Disco\BeanFactoryRegistry;
 use IceHawk\IceHawk\Defaults\RequestInfo;
 use IceHawk\IceHawk\IceHawk;
 use IceHawk\IceHawk\Interfaces\ProvidesRequestInfo;
+use Printdeal\Voyager\Application\Infra\SecurityService;
 
 /**
  * @Configuration
@@ -122,5 +123,11 @@ class Config
     public function requestBypasses()
     {
         return new RequestBypasser();
+    }
+
+    public function securityService()
+    {
+        $config = require_once __DIR__.'/../Auth0Config.php';
+        return new SecurityService($config);
     }
 }
