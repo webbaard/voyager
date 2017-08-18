@@ -8,6 +8,7 @@ namespace Printdeal\Voyager;
 use IceHawk\IceHawk\Routing\RequestBypasser;
 use Printdeal\Voyager\Application\Endpoints\Start\Read\SayHelloRequestHandler;
 use Printdeal\Voyager\Application\Endpoints\Start\Write\DoSomethingRequestHandler;
+use Printdeal\Voyager\Application\Endpoints\Start\Write\RequestAuthorisationHandler;
 use Printdeal\Voyager\Application\EventSubscribers\IceHawkInitEventSubscriber;
 use Printdeal\Voyager\Application\EventSubscribers\IceHawkReadEventSubscriber;
 use Printdeal\Voyager\Application\EventSubscribers\IceHawkWriteEventSubscriber;
@@ -69,6 +70,7 @@ class Config
 
 		return [
 			new WriteRoute( new Literal( '/do-something' ), new DoSomethingRequestHandler() ),
+			new WriteRoute( new Literal( '/authorisation/create' ), new RequestAuthorisationHandler() ),
 		];
 	}
 
