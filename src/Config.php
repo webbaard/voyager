@@ -40,6 +40,7 @@ use Prooph\ServiceBus\CommandBus;
 use Prooph\ServiceBus\Plugin\Router\CommandRouter;
 use Prooph\ServiceBus\Plugin\Router\EventRouter;
 
+
 /**
  * @Configuration
  */
@@ -54,7 +55,6 @@ class Config
     use AuthorisationRouterProviding;
 
     use AuthorisationRepositoryProviding;
-
     /**
      * @Bean
      * @return ProvidesRequestInfo
