@@ -1,4 +1,6 @@
 .idea/
 .vagrant/
 vendor/
-composer.lock
+
+# Configuration files
+config/slack.php

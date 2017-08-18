@@ -5,6 +5,9 @@
 
 namespace Printdeal\Voyager;
 
+use IceHawk\IceHawk\Defaults\Cookies;
+use IceHawk\IceHawk\Interfaces\ProvidesCookieData;
+use IceHawk\IceHawk\Routing\Interfaces\BypassesRequest;
 use IceHawk\IceHawk\Routing\RequestBypasser;
 use Printdeal\Voyager\Application\Endpoints\Start\Read\SayHelloRequestHandler;
 use Printdeal\Voyager\Application\Endpoints\Start\Write\DoSomethingRequestHandler;
@@ -14,8 +17,6 @@ use Printdeal\Voyager\Application\EventSubscribers\IceHawkReadEventSubscriber;
 use Printdeal\Voyager\Application\EventSubscribers\IceHawkWriteEventSubscriber;
 use Printdeal\Voyager\Application\FinalResponders\FinalReadResponder;
 use Printdeal\Voyager\Application\FinalResponders\FinalWriteResponder;
-use IceHawk\IceHawk\Defaults\Traits\DefaultCookieProviding;
-use IceHawk\IceHawk\Defaults\Traits\DefaultRequestBypassing;
 use IceHawk\IceHawk\Interfaces\RespondsFinallyToReadRequest;
 use IceHawk\IceHawk\Interfaces\RespondsFinallyToWriteRequest;
 use IceHawk\IceHawk\Routing\Patterns\Literal;
@@ -27,15 +28,14 @@ use bitExpert\Disco\BeanFactoryRegistry;
 use IceHawk\IceHawk\Defaults\RequestInfo;
 use IceHawk\IceHawk\IceHawk;
 use IceHawk\IceHawk\Interfaces\ProvidesRequestInfo;
+use Printdeal\Voyager\Configs\SlackConfig;
+use Printdeal\Voyager\Infrastructure\Service\SlackService;
 
 /**
  * @Configuration
  */
 class Config
 {
-	use DefaultCookieProviding;
-	use DefaultRequestBypassing;
-
     /**
      * @Bean
      * @return ProvidesRequestInfo
@@ -43,6 +43,15 @@ class Config
 	public function requestInfo(): ProvidesRequestInfo
     {
         return RequestInfo::fromEnv();
+    }
+
+    /**
+     * @Bean
+     * @return SlackService
+     */
+    public function slackService(): SlackService
+    {
+        return new SlackService(new SlackConfig());
     }
 
     /**
@@ -85,7 +94,7 @@ class Config
 		return [
 			new IceHawkInitEventSubscriber(),
 			new IceHawkReadEventSubscriber(),
-			new IceHawkWriteEventSubscriber(),
+			new IceHawkWriteEventSubscriber()
 		];
 	}
 
@@ -111,7 +120,12 @@ class Config
 		return new FinalWriteResponder();
 	}
 
-	public function icehawk(): IceHawk
+
+    /**
+     * @Bean
+     * @return IceHawk
+     */
+    public function icehawk(): IceHawk
     {
         $beanFactory = BeanFactoryRegistry::getInstance();
         $config = new IceHawkDiscoConfigDelegate($beanFactory);
@@ -119,8 +133,30 @@ class Config
         return new IceHawk($config, $delegate);
     }
 
-    public function requestBypasses()
+    /**
+     * @Bean
+     * @return RequestBypasser
+     */
+    public function requestBypasses(): RequestBypasser
     {
         return new RequestBypasser();
+    }
+
+    /**
+     * @Bean
+     * @return array|\Traversable|BypassesRequest[]
+     */
+    public function getRequestBypasses(): array
+    {
+        return [];
+    }
+
+    /**
+     * @Bean
+     * @return ProvidesCookieData
+     */
+    public function getCookies() : ProvidesCookieData
+    {
+        return Cookies::fromEnv();
     }
 }
