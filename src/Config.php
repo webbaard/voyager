@@ -5,6 +5,7 @@
 
 namespace Printdeal\Voyager;
 
+use IceHawk\IceHawk\Defaults\Cookies;
 use Printdeal\Voyager\Application\Endpoints\Start\Read\LoginRequestHandler;
 use IceHawk\IceHawk\Routing\RequestBypasser;
 use Printdeal\Voyager\Application\Endpoints\Start\Read\SayHelloRequestHandler;
@@ -14,8 +15,6 @@ use Printdeal\Voyager\Application\EventSubscribers\IceHawkReadEventSubscriber;
 use Printdeal\Voyager\Application\EventSubscribers\IceHawkWriteEventSubscriber;
 use Printdeal\Voyager\Application\FinalResponders\FinalReadResponder;
 use Printdeal\Voyager\Application\FinalResponders\FinalWriteResponder;
-use IceHawk\IceHawk\Defaults\Traits\DefaultCookieProviding;
-use IceHawk\IceHawk\Defaults\Traits\DefaultRequestBypassing;
 use IceHawk\IceHawk\Interfaces\RespondsFinallyToReadRequest;
 use IceHawk\IceHawk\Interfaces\RespondsFinallyToWriteRequest;
 use IceHawk\IceHawk\Routing\Patterns\Literal;
@@ -27,6 +26,7 @@ use bitExpert\Disco\BeanFactoryRegistry;
 use IceHawk\IceHawk\Defaults\RequestInfo;
 use IceHawk\IceHawk\IceHawk;
 use IceHawk\IceHawk\Interfaces\ProvidesRequestInfo;
+use IceHawk\IceHawk\Interfaces\ProvidesCookieData;
 use Printdeal\Voyager\Application\Infra\SecurityService;
 
 /**
@@ -34,9 +34,6 @@ use Printdeal\Voyager\Application\Infra\SecurityService;
  */
 class Config
 {
-	use DefaultCookieProviding;
-	use DefaultRequestBypassing;
-
     /**
      * @Bean
      * @return ProvidesRequestInfo
@@ -112,6 +109,10 @@ class Config
 		return new FinalWriteResponder();
 	}
 
+    /**
+     * @Bean
+     * @return IceHawk
+     */
 	public function icehawk(): IceHawk
     {
         $beanFactory = BeanFactoryRegistry::getInstance();
@@ -120,12 +121,29 @@ class Config
         return new IceHawk($config, $delegate);
     }
 
-    public function requestBypasses()
+    /**
+     * @Bean
+     * @return array
+     */
+    public function requestBypasses() :array
     {
-        return new RequestBypasser();
+        return [];
     }
 
-    public function securityService()
+    /**
+     * @Bean
+     * @return ProvidesCookieData
+     */
+    public function cookies() : ProvidesCookieData
+    {
+        return Cookies::fromEnv();
+    }
+
+    /**
+     * @Bean
+     * @return SecurityService
+     */
+    public function securityService() :SecurityService
     {
         $config = require_once __DIR__.'/../Auth0Config.php';
         return new SecurityService($config);
