@@ -5,7 +5,6 @@ namespace Printdeal\Voyager\Infrastructure\Service;
 use Frlnc\Slack\Core\Commander;
 use Frlnc\Slack\Http\CurlInteractor;
 use Frlnc\Slack\Http\SlackResponseFactory;
-use Printdeal\Voyager\Configs\SlackConfig;
 use Printdeal\Voyager\Domain\Messaging\SlackMessageResponse;
 
 class SlackService
