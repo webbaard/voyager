@@ -2,13 +2,17 @@
 
 namespace Printdeal\Voyager;
 
+use bitExpert\Disco\AnnotationBeanFactory;
+use bitExpert\Disco\BeanFactoryRegistry;
 use IceHawk\IceHawk\IceHawk;
 
 require(__DIR__ . '/../vendor/autoload.php');
 
-$config      = new IceHawkConfig();
-$delegate    = new IceHawkDelegate();
-$application = new IceHawk( $config, $delegate );
+$beanFactory = new AnnotationBeanFactory(Config::class);
+BeanFactoryRegistry::register($beanFactory);
+
+/** @var IceHawk $application */
+$application = $beanFactory->get('icehawk');
 
 $application->init();
 $application->handleRequest();
