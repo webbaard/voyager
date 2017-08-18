@@ -4,16 +4,9 @@
 namespace Printdeal\Voyager\Domain\Subject;
 
 
-interface SubjectId
-{
-    /**
-     * @param $id
-     * @return SubjectId
-     */
-    public static function fromString($id);
+use Printdeal\Voyager\Domain\Common\IdValueObject;
 
-    /**
-     * @return string
-     */
-    public function __toString();
+class SubjectId
+{
+    use IdValueObject;
 }

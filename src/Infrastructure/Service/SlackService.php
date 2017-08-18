@@ -18,12 +18,10 @@ class SlackService
 
     /**
      * SlackService constructor.
-     * @param SlackConfig $slackConfig
+     * @param string $slackToken
      */
-    public function __construct(
-        SlackConfig $slackConfig
-    ) {
-        $this->slackToken = $slackConfig->getToken();
+    public function __construct(string $slackToken) {
+        $this->slackToken = $slackToken;
 
         $curlInteractor = new CurlInteractor;
         $curlInteractor->setResponseFactory(new SlackResponseFactory);

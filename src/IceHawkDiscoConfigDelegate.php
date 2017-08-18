@@ -9,7 +9,6 @@ use IceHawk\IceHawk\Interfaces\ProvidesCookieData;
 use IceHawk\IceHawk\Interfaces\ProvidesRequestInfo;
 use IceHawk\IceHawk\Interfaces\RespondsFinallyToReadRequest;
 use IceHawk\IceHawk\Interfaces\RespondsFinallyToWriteRequest;
-use IceHawk\IceHawk\Routing\Interfaces\BypassesRequest;
 
 /**
  * Class IceHawkDiscoConfigDelegate
@@ -61,6 +60,6 @@ final class IceHawkDiscoConfigDelegate implements ConfiguresIceHawk
 
     public function getCookies(): ProvidesCookieData
     {
-        return $this->beanFactory->get('getCookies');
+        return $this->beanFactory->get('cookies');
     }
 }
