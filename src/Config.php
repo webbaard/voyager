@@ -5,6 +5,7 @@
 
 namespace Printdeal\Voyager;
 
+use IceHawk\IceHawk\Routing\RequestBypasser;
 use Printdeal\Voyager\Application\Endpoints\Start\Read\SayHelloRequestHandler;
 use Printdeal\Voyager\Application\Endpoints\Start\Write\DoSomethingRequestHandler;
 use Printdeal\Voyager\Application\EventSubscribers\IceHawkInitEventSubscriber;
@@ -14,25 +15,40 @@ use Printdeal\Voyager\Application\FinalResponders\FinalReadResponder;
 use Printdeal\Voyager\Application\FinalResponders\FinalWriteResponder;
 use IceHawk\IceHawk\Defaults\Traits\DefaultCookieProviding;
 use IceHawk\IceHawk\Defaults\Traits\DefaultRequestBypassing;
-use IceHawk\IceHawk\Defaults\Traits\DefaultRequestInfoProviding;
-use IceHawk\IceHawk\Interfaces\ConfiguresIceHawk;
 use IceHawk\IceHawk\Interfaces\RespondsFinallyToReadRequest;
 use IceHawk\IceHawk\Interfaces\RespondsFinallyToWriteRequest;
 use IceHawk\IceHawk\Routing\Patterns\Literal;
 use IceHawk\IceHawk\Routing\ReadRoute;
 use IceHawk\IceHawk\Routing\WriteRoute;
+use bitExpert\Disco\Annotations\Bean;
+use bitExpert\Disco\Annotations\Configuration;
+use bitExpert\Disco\BeanFactoryRegistry;
+use IceHawk\IceHawk\Defaults\RequestInfo;
+use IceHawk\IceHawk\IceHawk;
+use IceHawk\IceHawk\Interfaces\ProvidesRequestInfo;
 
 /**
- * Class IceHawkConfig
- * @package Printdeal\Voyager
+ * @Configuration
  */
-final class IceHawkConfig implements ConfiguresIceHawk
+class Config
 {
-	use DefaultRequestInfoProviding;
 	use DefaultCookieProviding;
 	use DefaultRequestBypassing;
 
-	public function getReadRoutes()
+    /**
+     * @Bean
+     * @return ProvidesRequestInfo
+     */
+	public function requestInfo(): ProvidesRequestInfo
+    {
+        return RequestInfo::fromEnv();
+    }
+
+    /**
+     * @Bean
+     * @return array
+     */
+	public function readRoutes(): array
 	{
 		# Define your read routes (GET / HEAD) here
 		# For matching the URI you can use the Literal, RegExp or NamedRegExp pattern classes
@@ -42,7 +58,11 @@ final class IceHawkConfig implements ConfiguresIceHawk
 		];
 	}
 
-	public function getWriteRoutes()
+    /**
+     * @Bean
+     * @return array
+     */
+	public function writeRoutes(): array
 	{
 		# Define your write routes (POST / PUT / PATCH / DELETE) here
 		# For matching the URI you can use the Literal, RegExp or NamedRegExp pattern classes
@@ -52,7 +72,11 @@ final class IceHawkConfig implements ConfiguresIceHawk
 		];
 	}
 
-	public function getEventSubscribers() : array
+    /**
+     * @Bean
+     * @return array
+     */
+	public function eventSubscribers() : array
 	{
 		# Register your subscribers for IceHawk events here
 
@@ -63,17 +87,38 @@ final class IceHawkConfig implements ConfiguresIceHawk
 		];
 	}
 
-	public function getFinalReadResponder() : RespondsFinallyToReadRequest
+    /**
+     * @Bean
+     * @return RespondsFinallyToReadRequest
+     */
+	public function finalReadResponder() : RespondsFinallyToReadRequest
 	{
 		# Provide a final responder for read requests here
 
 		return new FinalReadResponder();
 	}
 
-	public function getFinalWriteResponder() : RespondsFinallyToWriteRequest
+    /**
+     * @Bean
+     * @return RespondsFinallyToWriteRequest
+     */
+	public function finalWriteResponder() : RespondsFinallyToWriteRequest
 	{
 		# Provide a final responder for write requests here
 
 		return new FinalWriteResponder();
 	}
+
+	public function icehawk(): IceHawk
+    {
+        $beanFactory = BeanFactoryRegistry::getInstance();
+        $config = new IceHawkDiscoConfigDelegate($beanFactory);
+        $delegate = new IceHawkDelegate();
+        return new IceHawk($config, $delegate);
+    }
+
+    public function requestBypasses()
+    {
+        return new RequestBypasser();
+    }
 }
