@@ -5,8 +5,6 @@
 
 namespace Printdeal\Voyager;
 
-use bitExpert\Disco\AnnotationBeanFactory;
-use bitExpert\Disco\BeanFactoryRegistry;
 use Printdeal\Voyager\Application\Endpoints\Start\Read\LoginRequestHandler;
 use Printdeal\Voyager\Application\Endpoints\Start\Read\SayHelloRequestHandler;
 use Printdeal\Voyager\Application\Endpoints\Start\Write\DoSomethingRequestHandler;
@@ -24,7 +22,6 @@ use IceHawk\IceHawk\Interfaces\RespondsFinallyToWriteRequest;
 use IceHawk\IceHawk\Routing\Patterns\Literal;
 use IceHawk\IceHawk\Routing\ReadRoute;
 use IceHawk\IceHawk\Routing\WriteRoute;
-use Printdeal\Voyager\Application\Infra\Configuration;
 
 /**
  * Class IceHawkConfig
@@ -35,12 +32,6 @@ final class IceHawkConfig implements ConfiguresIceHawk
 	use DefaultRequestInfoProviding;
 	use DefaultCookieProviding;
 	use DefaultRequestBypassing;
-
-	public function __construct()
-    {
-        $beanFactory = new AnnotationBeanFactory(Configuration::class);
-        BeanFactoryRegistry::register($beanFactory);
-    }
 
     public function getReadRoutes()
 	{
