@@ -12,11 +12,11 @@ class SubjectWasAdded extends AggregateChanged
     const PAYLOAD_SUBJECT = 'subject';
 
     /**
-     * @param Uuid $id
+     * @param AuthorisationId $id
      * @param SubjectId $subjectId
      * @return SubjectWasAdded
      */
-    public static function from(Uuid $id, SubjectId $subjectId)
+    public static function from(AuthorisationId $id, SubjectId $subjectId)
     {
         return self::occur(
             (string)$id,

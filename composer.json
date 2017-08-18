@@ -15,12 +15,17 @@
         "icehawk/session": "^1.1",
         "icehawk/pubsub": "^1.0",
         "auth0/auth0-php": "^5.0",
-        "bitexpert/disco": "^0.8.0"
+        "bitexpert/disco": "^0.8.0",
+        "frlnc/php-slack": "^1.0"
     },
     "authors": [
         {
             "name": "tim.huijzers",
             "email": "tim.huijzers@drukwerkdeal.nl"
+        },
+        {
+            "name": "Patrick Rombouts",
+            "email": "patrick.rombouts@drukwerkdeal.nl"
         }
     ],
     "autoload": {

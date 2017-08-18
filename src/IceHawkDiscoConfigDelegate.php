@@ -9,7 +9,6 @@ use IceHawk\IceHawk\Interfaces\ProvidesCookieData;
 use IceHawk\IceHawk\Interfaces\ProvidesRequestInfo;
 use IceHawk\IceHawk\Interfaces\RespondsFinallyToReadRequest;
 use IceHawk\IceHawk\Interfaces\RespondsFinallyToWriteRequest;
-use IceHawk\IceHawk\Routing\Interfaces\BypassesRequest;
 
 /**
  * Class IceHawkDiscoConfigDelegate
@@ -54,13 +53,13 @@ final class IceHawkDiscoConfigDelegate implements ConfiguresIceHawk
         return $this->beanFactory->get('finalWriteResponder');
     }
 
-    public function getRequestBypasses(): BypassesRequest
+    public function getRequestBypasses(): array
     {
         return $this->beanFactory->get('getRequestBypasses');
     }
 
     public function getCookies(): ProvidesCookieData
     {
-        return $this->beanFactory->get('getCookies');
+        return $this->beanFactory->get('cookies');
     }
 }

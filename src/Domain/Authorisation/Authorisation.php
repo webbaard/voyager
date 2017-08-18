@@ -49,38 +49,35 @@ class Authorisation extends AggregateRoot
     private $subjectIds;
 
     /**
-     * Authorisation constructor.
-     * @param $id
-     */
-    protected function __construct($id)
-    {
-        $this->id = $id;
-    }
-
-    /**
+     * @param AuthorisationId $authorisationId
      * @param RequesterId $requesterId
      * @param Description $description
-     * @param array $subjectIds
      * @return Authorisation
      */
-    public static function request(RequesterId $requesterId, Description $description, array $subjectIds): self
+    public static function request(AuthorisationId $authorisationId, RequesterId $requesterId, Description $description): self
     {
         $self = new self(Uuid::uuid4());
         $self->recordThat(
             AuthorisationRequested::from(
-                $self->id,
+                $authorisationId,
                 $requesterId,
                 $description
             )
         );
-        foreach ($subjectIds as $subjectId) {
-            $self->recordThat(
-                SubjectWasAdded::from(
-                    $self->id,
-                    $subjectId
-                )
-            );
-        }
+        return $self;
+    }
+
+    /**
+     * @param SubjectId $subjectId
+     */
+    public function addSubject(SubjectId $subjectId)
+    {
+        $this->recordThat(
+            SubjectWasAdded::from(
+                AuthorisationId::fromString($this->id),
+                $subjectId
+            )
+        );
     }
 
     /**

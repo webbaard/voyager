@@ -9,24 +9,34 @@ use Rhumsaa\Uuid\Uuid;
 
 class AuthorisationRequested extends AggregateChanged
 {
+    const PAYLOAD_AUTHORISATION = 'authorisation';
     const PAYLOAD_REQUESTER = 'requester';
     const PAYLOAD_DESCRIPTION = 'description';
 
     /**
-     * @param Uuid $id
+     * @param AuthorisationId $id
      * @param RequesterId $requesterId
      * @param string $description
      * @return AuthorisationRequested
      */
-    public static function from(Uuid $id, RequesterId $requesterId, string $description)
+    public static function from(AuthorisationId $id, RequesterId $requesterId, string $description)
     {
         return self::occur(
             (string)$id,
             [
+                self::PAYLOAD_AUTHORISATION => (string)$id,
                 self::PAYLOAD_REQUESTER => (string)$requesterId,
                 self::PAYLOAD_DESCRIPTION => $description
             ]
         );
+    }
+
+    /**
+     * @return AuthorisationId
+     */
+    public function authorisation(): AuthorisationId
+    {
+        return AuthorisationId::fromString($this->payload[self::PAYLOAD_AUTHORISATION]);
     }
 
     /**

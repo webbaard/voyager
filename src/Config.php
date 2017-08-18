@@ -1,21 +1,20 @@
 <?php declare(strict_types = 1);
-/**
- * @author tim.huijzers <tim.huijzers@drukwerkdeal.nl>
- */
 
 namespace Printdeal\Voyager;
 
+use Doctrine\DBAL\Connection;
+use IceHawk\IceHawk\IceHawk;
+use IceHawk\IceHawk\Interfaces\ProvidesCookieData;
+use IceHawk\IceHawk\Routing\Interfaces\BypassesRequest;
+use IceHawk\IceHawk\Defaults\Cookies;
 use IceHawk\IceHawk\Routing\RequestBypasser;
 use Printdeal\Voyager\Application\Endpoints\Start\Read\SayHelloRequestHandler;
-use Printdeal\Voyager\Application\Endpoints\Start\Write\DoSomethingRequestHandler;
 use Printdeal\Voyager\Application\Endpoints\Start\Write\RequestAuthorisationHandler;
 use Printdeal\Voyager\Application\EventSubscribers\IceHawkInitEventSubscriber;
 use Printdeal\Voyager\Application\EventSubscribers\IceHawkReadEventSubscriber;
 use Printdeal\Voyager\Application\EventSubscribers\IceHawkWriteEventSubscriber;
 use Printdeal\Voyager\Application\FinalResponders\FinalReadResponder;
 use Printdeal\Voyager\Application\FinalResponders\FinalWriteResponder;
-use IceHawk\IceHawk\Defaults\Traits\DefaultCookieProviding;
-use IceHawk\IceHawk\Defaults\Traits\DefaultRequestBypassing;
 use IceHawk\IceHawk\Interfaces\RespondsFinallyToReadRequest;
 use IceHawk\IceHawk\Interfaces\RespondsFinallyToWriteRequest;
 use IceHawk\IceHawk\Routing\Patterns\Literal;
@@ -25,16 +24,36 @@ use bitExpert\Disco\Annotations\Bean;
 use bitExpert\Disco\Annotations\Configuration;
 use bitExpert\Disco\BeanFactoryRegistry;
 use IceHawk\IceHawk\Defaults\RequestInfo;
-use IceHawk\IceHawk\IceHawk;
 use IceHawk\IceHawk\Interfaces\ProvidesRequestInfo;
+use Printdeal\Voyager\Config\AuthorisationRepositoryProviding;
+use Printdeal\Voyager\Config\AuthorisationRouterProviding;
+use Printdeal\Voyager\Config\CommandBusProviding;
+use Printdeal\Voyager\Config\CommandRouterProviding;
+use Printdeal\Voyager\Config\DatabaseProviding;
+use Printdeal\Voyager\Config\EventRouterProviding;
+use Printdeal\Voyager\Config\EventStoreProviding;
+use Printdeal\Voyager\Config\SlackProviding;
+use Printdeal\Voyager\Infrastructure\ESAuthorisationRepository;
+use Printdeal\Voyager\Infrastructure\Service\SlackService;
+use Prooph\EventStore\EventStore;
+use Prooph\ServiceBus\CommandBus;
+use Prooph\ServiceBus\Plugin\Router\CommandRouter;
+use Prooph\ServiceBus\Plugin\Router\EventRouter;
 
 /**
  * @Configuration
  */
 class Config
 {
-	use DefaultCookieProviding;
-	use DefaultRequestBypassing;
+    use DatabaseProviding;
+    use EventStoreProviding;
+    use EventRouterProviding;
+    use CommandBusProviding;
+    use CommandRouterProviding;
+    use SlackProviding;
+    use AuthorisationRouterProviding;
+
+    use AuthorisationRepositoryProviding;
 
     /**
      * @Bean
@@ -43,6 +62,15 @@ class Config
 	public function requestInfo(): ProvidesRequestInfo
     {
         return RequestInfo::fromEnv();
+    }
+
+    /**
+     * @Bean
+     * @return SlackService
+     */
+    public function slackService(): SlackService
+    {
+        return $this->getSlackService();
     }
 
     /**
@@ -65,12 +93,10 @@ class Config
      */
 	public function writeRoutes(): array
 	{
-		# Define your write routes (POST / PUT / PATCH / DELETE) here
-		# For matching the URI you can use the Literal, RegExp or NamedRegExp pattern classes
+        $this->setAuthorisationRouting($this->commandRouter(), $this->authorisationRepository());
 
 		return [
-			new WriteRoute( new Literal( '/do-something' ), new DoSomethingRequestHandler() ),
-			new WriteRoute( new Literal( '/authorisation/create' ), new RequestAuthorisationHandler() ),
+			new WriteRoute( new Literal( '/authorisation/create' ), new RequestAuthorisationHandler($this->commandBus()) ),
 		];
 	}
 
@@ -85,7 +111,7 @@ class Config
 		return [
 			new IceHawkInitEventSubscriber(),
 			new IceHawkReadEventSubscriber(),
-			new IceHawkWriteEventSubscriber(),
+			new IceHawkWriteEventSubscriber()
 		];
 	}
 
@@ -111,7 +137,74 @@ class Config
 		return new FinalWriteResponder();
 	}
 
-	public function icehawk(): IceHawk
+    /**
+     * @Bean
+     * @return ProvidesCookieData
+     */
+    public function cookies(): ProvidesCookieData
+    {
+        return $this->getCookies();
+    }
+
+    /**
+     * @Bean
+     * @return ESAuthorisationRepository
+     */
+    public function authorisationRepository(): ESAuthorisationRepository
+    {
+        return $this->getAuthorisationRepository($this->eventStore());
+    }
+
+    /**
+     * @Bean
+     * @return CommandBus
+     */
+    public function commandBus(): CommandBus
+    {
+        return $this->getCommandBus($this->eventStore());
+    }
+
+    /**
+     * @Bean
+     * @return CommandRouter
+     */
+    public function commandRouter(): CommandRouter
+    {
+        return $this->getCommandRouter($this->commandBus());
+    }
+
+    /**
+     * @Bean
+     * @return Connection
+     */
+    public function databaseConnection(): Connection
+    {
+        return $this->getDatabaseConnection();
+    }
+
+    /**
+     * @Bean
+     * @return EventRouter
+     */
+    public function eventRouter(): EventRouter
+    {
+        return $this->getEventRouter($this->eventStore());
+    }
+
+    /**
+     * @Bean
+     * @return EventStore
+     */
+    public function eventStore(): EventStore
+    {
+        return $this->getEventStore($this->databaseConnection());
+    }
+
+    /**
+     * @Bean
+     * @return IceHawk
+     */
+    public function icehawk(): IceHawk
     {
         $beanFactory = BeanFactoryRegistry::getInstance();
         $config = new IceHawkDiscoConfigDelegate($beanFactory);
@@ -119,8 +212,30 @@ class Config
         return new IceHawk($config, $delegate);
     }
 
-    public function requestBypasses()
+    /**
+     * @Bean
+     * @return RequestBypasser
+     */
+    public function requestBypasses(): RequestBypasser
     {
         return new RequestBypasser();
+    }
+
+    /**
+     * @Bean
+     * @return array|\Traversable|BypassesRequest[]
+     */
+    public function getRequestBypasses(): array
+    {
+        return [];
+    }
+
+    /**
+     * @Bean
+     * @return ProvidesCookieData
+     */
+    public function getCookies() : ProvidesCookieData
+    {
+        return Cookies::fromEnv();
     }
 }
