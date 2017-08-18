@@ -5,6 +5,9 @@
 
 namespace Printdeal\Voyager;
 
+use bitExpert\Disco\AnnotationBeanFactory;
+use bitExpert\Disco\BeanFactoryRegistry;
+use Printdeal\Voyager\Application\Endpoints\Start\Read\LoginRequestHandler;
 use Printdeal\Voyager\Application\Endpoints\Start\Read\SayHelloRequestHandler;
 use Printdeal\Voyager\Application\Endpoints\Start\Write\DoSomethingRequestHandler;
 use Printdeal\Voyager\Application\EventSubscribers\IceHawkInitEventSubscriber;
@@ -21,6 +24,7 @@ use IceHawk\IceHawk\Interfaces\RespondsFinallyToWriteRequest;
 use IceHawk\IceHawk\Routing\Patterns\Literal;
 use IceHawk\IceHawk\Routing\ReadRoute;
 use IceHawk\IceHawk\Routing\WriteRoute;
+use Printdeal\Voyager\Application\Infra\Configuration;
 
 /**
  * Class IceHawkConfig
@@ -32,13 +36,20 @@ final class IceHawkConfig implements ConfiguresIceHawk
 	use DefaultCookieProviding;
 	use DefaultRequestBypassing;
 
-	public function getReadRoutes()
+	public function __construct()
+    {
+        $beanFactory = new AnnotationBeanFactory(Configuration::class);
+        BeanFactoryRegistry::register($beanFactory);
+    }
+
+    public function getReadRoutes()
 	{
 		# Define your read routes (GET / HEAD) here
 		# For matching the URI you can use the Literal, RegExp or NamedRegExp pattern classes
 
 		return [
 			new ReadRoute( new Literal( '/' ), new SayHelloRequestHandler() ),
+            new ReadRoute( new Literal( '/auth0/callback'), new LoginRequestHandler() )
 		];
 	}
 

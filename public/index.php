@@ -1,7 +1,4 @@
 <?php declare(strict_types = 1);
-/**
- * @author tim.huijzers <tim.huijzers@drukwerkdeal.nl>
- */
 
 namespace Printdeal\Voyager;
 
