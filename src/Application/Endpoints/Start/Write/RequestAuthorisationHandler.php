@@ -42,7 +42,6 @@ final class RequestAuthorisationHandler implements HandlesPostRequest
             RequesterId::fromString(Uuid::uuid4()),
             Description::fromString('test')
         );
-        var_dump((string)$command->authorisation());
         $this->commandBus->dispatch($command);
         $this->commandBus->dispatch(AddSubject::from(
             AuthorisationId::fromString($command->authorisation()),

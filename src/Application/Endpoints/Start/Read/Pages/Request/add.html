@@ -1,0 +1,83 @@
+<!doctype html>
+<html class="no-js" lang="">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Voyager | requests</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <!-- Place favicon.ico in the root directory -->
+
+    <link rel="stylesheet" href="/css/normalize.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <script src="/js/vendor/modernizr-2.8.3.min.js"></script>
+</head>
+<body>
+<header>
+    <h1>Approve your invoices</h1>
+    <nav>
+        <ul>
+            <li><a href="list.html.twig">View all requests</a></li>
+            <li><a href="add.html">Add a request</a></li>
+        </ul>
+    </nav>
+    <div class="logo">
+        <img alt="logo" src="/public/logo.png">
+    </div>
+
+</header>
+<section>
+    <h2>Add your request</h2>
+    <form class="add-request" action="list.html.twig" method="post">
+        <label for="supplier">Supplier:</label>
+        <select name="supplier">
+            <option value="venlo">Venlo</option>
+        </select><br>
+
+        <label for"cost_center">Cost center:</label>
+        <select name="cost_center">
+            <option value="option1">option1</option>
+        </select><br>
+
+        <label for="gl_account">Commodity:</label>
+        <select name="gl_account">
+            <option value="value1">value1</option>
+        </select><br>
+
+        <label for="project_id">Project ID:</label>
+        <input type="text" name="project_id"><br>
+
+        <label for="amount">Amount (excl. VAT):</label>
+        <input type="text" name="amount"><br>
+
+        <label for="due_date">Due date:</label>
+        <input type="date" name="due_date"><br>
+
+        <label for="description">Description:</label>
+        <textarea name="description"></textarea><br>
+
+        <div class="approver-wrap">
+            <div class="approver-item">
+                <label for="approver_1">Approver</label>
+                <select name="approver[]" id="approver_1" class="approver">
+                    <option value="">Select approver</option>
+                    <option value="name1">name1</option>
+                    <option value="name2">name2</option>
+                </select><br>
+            </div>
+        </div>
+
+        <input type="submit" value"Submit">
+    </form>
+</section>
+<footer>
+    <p>Simplified approval invoice flow</p>
+</footer>
+<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+<script>window.jQuery || document.write('<script src="/js/vendor/jquery-1.12.0.min.js"><\/script>')</script>
+<script src="/js/plugins.js"></script>
+<script src="/js/main.js"></script>
+</body>
+</html>

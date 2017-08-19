@@ -28,13 +28,13 @@ final class IceHawkInitEventSubscriber extends AbstractEventSubscriber
 		# This method is called AFTER setUpGlobalVars and getRequestInfo
 		# and BEFORE setUpErrorHandling and setUpSessionHandling
 
-		# You can access the request info via $event->getRequestInfo()
+		# You can access the Request info via $event->getRequestInfo()
 	}
 
 	protected function whenIceHawkWasInitialized( IceHawkWasInitializedEvent $event )
 	{
 		# This method is called AFTER setUpErrorHandling and setUpSessionHandling
 
-		# You can access the request info via $event->getRequestInfo()
+		# You can access the Request info via $event->getRequestInfo()
 	}
 }

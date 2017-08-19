@@ -25,17 +25,17 @@ final class IceHawkWriteEventSubscriber extends AbstractEventSubscriber
 
 	public function whenHandlingWriteRequest( HandlingWriteRequestEvent $event )
 	{
-		# This method is called BEFORE the request handler handles the write request
+		# This method is called BEFORE the Request handler handles the write Request
 
-		# You can access the request info via $event->getRequestInfo()
-		# You can access the request input via $event->getRequestInput()
+		# You can access the Request info via $event->getRequestInfo()
+		# You can access the Request input via $event->getRequestInput()
 	}
 
 	public function whenWriteRequestWasHandled( WriteRequestWasHandledEvent $event )
 	{
-		# This method is called AFTER the request handler has handled the write request
+		# This method is called AFTER the Request handler has handled the write Request
 
-		# You can access the request info via $event->getRequestInfo()
-		# You can access the request input via $event->getRequestInput()
+		# You can access the Request info via $event->getRequestInfo()
+		# You can access the Request input via $event->getRequestInput()
 	}
 }
