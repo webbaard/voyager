@@ -1,11 +1,6 @@
 .idea/
 .vagrant/
 vendor/
-<<<<<<< HEAD
-
-# Configuration files
-config/slack.php
-=======
+config/
 composer.lock
-Auth0Config.php
->>>>>>> 81ebb999bf8911975dd65d24de2f7694d5e339b3
+

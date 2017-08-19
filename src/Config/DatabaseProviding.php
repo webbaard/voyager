@@ -16,20 +16,14 @@ trait DatabaseProviding
     private $schema;
 
     /**
+     * @param array $configData
      * @return Connection
      */
-    private function getDatabaseConnection()
+    private function getDatabaseConnection(array $configData)
     {
         // Connection and schema setup
         $config = new Configuration();
-        $connectionParams = array(
-            'dbname' => '',
-            'user' => '',
-            'password' => '',
-            'host' => '',
-            'port' => 3306,
-            'driver' => 'pdo_mysql',
-        );
+        $connectionParams = $configData;
 
         $connection = DriverManager::getConnection($connectionParams, $config);
 

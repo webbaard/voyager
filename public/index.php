@@ -16,7 +16,7 @@ BeanFactoryRegistry::register($beanFactory);
 $securityService = $beanFactory->get('securityService');
 $securityService->redirect();
 
-$securityService->getUsers();
+//$securityService->getUsers();
 
 /** @var IceHawk $application */
 $application = $beanFactory->get('icehawk');
