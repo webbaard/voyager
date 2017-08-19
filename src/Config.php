@@ -79,7 +79,7 @@ class Config
 
 		return [
             new ReadRoute( new Literal( '/auth0/callback'), new LoginRequestHandler() ),
-			new ReadRoute( new Literal( '/' ), new ListRequestHandler($this->twig()) ),
+			new ReadRoute( new Literal( '/' ), new ListRequestHandler($this->twig(), $this->authorisationRepository()) ),
             new ReadRoute( new Literal( '/authorisation/create'), new NewRequestAuthorisationHandler())
 
         ];

@@ -19,6 +19,6 @@ final class NewRequestAuthorisationHandler implements HandlesGetRequest
 
         # And responds with a 200 OK and page content
 
-        (new Page())->respond( file_get_contents(__DIR__ . '/Pages/Request/add.html') );
+        (new Page())->respond( file_get_contents(__DIR__ . '/Pages/Request/add.html.twig') );
     }
 }
