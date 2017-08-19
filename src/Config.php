@@ -7,7 +7,7 @@ use IceHawk\IceHawk\IceHawk;
 use IceHawk\IceHawk\Interfaces\ProvidesCookieData;
 use IceHawk\IceHawk\Routing\Interfaces\BypassesRequest;
 use IceHawk\IceHawk\Defaults\Cookies;
-use IceHawk\IceHawk\Routing\RequestBypasser;
+use Printdeal\Voyager\Application\Endpoints\Start\Read\LoginRequestHandler;
 use Printdeal\Voyager\Application\Endpoints\Start\Read\SayHelloRequestHandler;
 use Printdeal\Voyager\Application\Endpoints\Start\Write\RequestAuthorisationHandler;
 use Printdeal\Voyager\Application\EventSubscribers\IceHawkInitEventSubscriber;
@@ -39,7 +39,7 @@ use Prooph\EventStore\EventStore;
 use Prooph\ServiceBus\CommandBus;
 use Prooph\ServiceBus\Plugin\Router\CommandRouter;
 use Prooph\ServiceBus\Plugin\Router\EventRouter;
-
+use Printdeal\Voyager\Application\Infra\SecurityService;
 
 /**
  * @Configuration
@@ -55,6 +55,7 @@ class Config
     use AuthorisationRouterProviding;
 
     use AuthorisationRepositoryProviding;
+
     /**
      * @Bean
      * @return ProvidesRequestInfo
@@ -84,6 +85,7 @@ class Config
 
 		return [
 			new ReadRoute( new Literal( '/' ), new SayHelloRequestHandler() ),
+            new ReadRoute( new Literal( '/auth0/callback'), new LoginRequestHandler() )
 		];
 	}
 
@@ -136,15 +138,6 @@ class Config
 
 		return new FinalWriteResponder();
 	}
-
-    /**
-     * @Bean
-     * @return ProvidesCookieData
-     */
-    public function cookies(): ProvidesCookieData
-    {
-        return $this->getCookies();
-    }
 
     /**
      * @Bean
@@ -214,11 +207,30 @@ class Config
 
     /**
      * @Bean
-     * @return RequestBypasser
+     * @return array
      */
-    public function requestBypasses(): RequestBypasser
+    public function requestBypasses() :array
     {
-        return new RequestBypasser();
+        return [];
+    }
+
+    /**
+     * @Bean
+     * @return ProvidesCookieData
+     */
+    public function cookies() : ProvidesCookieData
+    {
+        return Cookies::fromEnv();
+    }
+
+    /**
+     * @Bean
+     * @return SecurityService
+     */
+    public function securityService() :SecurityService
+    {
+        $config = require_once __DIR__.'/../Auth0Config.php';
+        return new SecurityService($config);
     }
 
     /**
@@ -228,14 +240,5 @@ class Config
     public function getRequestBypasses(): array
     {
         return [];
-    }
-
-    /**
-     * @Bean
-     * @return ProvidesCookieData
-     */
-    public function getCookies() : ProvidesCookieData
-    {
-        return Cookies::fromEnv();
     }
 }
