@@ -11,10 +11,9 @@ trait SlackProviding
      * @return SlackService
      * @throws SlackConfigNotFound
      */
-    private function getSlackService(): SlackService
+    private function getSlackService($config): SlackService
     {
-        $loadedConfig = include(__DIR__ . '/../../config/slack.php');
-        $token = $loadedConfig['token'];
+        $token = $config['token'];
 
         if (!$token) {
             throw new SlackConfigNotFound();

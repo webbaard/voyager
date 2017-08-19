@@ -71,7 +71,8 @@ class Config
      */
     public function slackService(): SlackService
     {
-        return $this->getSlackService();
+        $loadedConfig = include(__DIR__ . '/../config/slack.php');
+        return $this->getSlackService($loadedConfig);
     }
 
     /**
@@ -173,7 +174,7 @@ class Config
     public function databaseConnection(): Connection
     {
         $config = require_once __DIR__.'/../database.php';
-        return $this->getDatabaseConnection();
+        return $this->getDatabaseConnection($config);
     }
 
     /**
