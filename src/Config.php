@@ -172,6 +172,7 @@ class Config
      */
     public function databaseConnection(): Connection
     {
+        $config = require_once __DIR__.'/../database.php';
         return $this->getDatabaseConnection();
     }
 
@@ -229,7 +230,7 @@ class Config
      */
     public function securityService() :SecurityService
     {
-        $config = require_once __DIR__.'/../Auth0Config.php';
+        $config = require_once __DIR__.'/../config/auth0.php';
         return new SecurityService($config);
     }
 

@@ -11,12 +11,12 @@ require(__DIR__ . '/../vendor/autoload.php');
 
 $beanFactory = new AnnotationBeanFactory(Config::class);
 BeanFactoryRegistry::register($beanFactory);
+//
+///** @var SecurityService $securityService */
+//$securityService = $beanFactory->get('securityService');
+//$securityService->redirect();
 
-/** @var SecurityService $securityService */
-$securityService = $beanFactory->get('securityService');
-$securityService->redirect();
-
-$securityService->getUsers();
+//$securityService->getUsers();
 
 /** @var IceHawk $application */
 $application = $beanFactory->get('icehawk');
