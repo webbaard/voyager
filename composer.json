@@ -16,7 +16,8 @@
         "icehawk/pubsub": "^1.0",
         "auth0/auth0-php": "^5.0",
         "bitexpert/disco": "^0.8.0",
-        "frlnc/php-slack": "^1.0"
+        "frlnc/php-slack": "^1.0",
+        "twig/twig": "^2.4"
     },
     "authors": [
         {

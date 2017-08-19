@@ -1,0 +1,107 @@
+<!doctype html>
+<html class="no-js" lang="">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Voyager | requests</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <!-- Place favicon.ico in the root directory -->
+
+    <link rel="stylesheet" href="/css/normalize.css">
+    <link rel="stylesheet" href="/css/main.css">
+    <script src="/js/vendor/modernizr-2.8.3.min.js"></script>
+</head>
+<body>
+<header>
+    <h1>Approve your invoices</h1>
+    <nav>
+        <ul>
+            <li><a href="">View all requests</a></li>
+            <li><a href="/authorisation/create">Add a request</a></li>
+        </ul>
+    </nav>
+    <div class="logo">
+        <img alt="logo" src="/logo.png">
+    </div>
+
+</header>
+<section>
+    <h2>Requests overview</h2>
+    <p>View here your requests and the requests that need your approval</p>
+
+    <h3>My requests</h3>
+    <table id ="myTable">
+        <thead>
+        <tr class="header">
+            <th>Request number</th>
+            <th>Supplier</th>
+            <th>Amount</th>
+            <th>Approved</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><a href="detail.html">142</a></td>
+            <td>{{ test }}</td>
+            <td>&euro; 1050,00</td>
+            <td>No</td>
+        </tr>
+        <tr>
+            <td><a href="detail.html">143</a></td>
+            <td>Kabels</td>
+            <td>&euro; 880,00</td>
+            <td>No</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <h3>I have to approve</h3>
+    <table id ="myTable">
+        <thead>
+        <tr class="header">
+            <th>Request number</th>
+            <th>Supplier</th>
+            <th>Amount</th>
+            <th>Approved</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td><a href="detail.html">123</a></td>
+            <td>Control Media</td>
+            <td>&euro; 544,00</td>
+            <td>No</td>
+        </tr>
+        <tr>
+            <td><a href="detail.html">124</a></td>
+            <td>De Groot</td>
+            <td>&euro; 669,00</td>
+            <td>No</td>
+        </tr>
+        <tr>
+            <td><a href="detail.html">125</a></td>
+            <td>Verhaag</td>
+            <td>&euro; 540,00</td>
+            <td>No</td>
+        </tr>
+        <tr>
+            <td><a href="detail.html">126</a></td>
+            <td>Boels</td>
+            <td>&euro; 350,00</td>
+            <td>No</td>
+        </tr>
+        </tbody>
+    </table>
+</section>
+<footer>
+    <p>Simplified approval invoice flow</p>
+</footer>
+<script src="https://code.jquery.com/jquery-1.12.0.min.js"></script>
+<script>window.jQuery || document.write('<script src="/js/vendor/jquery-1.12.0.min.js"><\/script>')</script>
+<script src="/js/plugins.js"></script>
+<script src="/js/main.js"></script>
+</body>
+</html>

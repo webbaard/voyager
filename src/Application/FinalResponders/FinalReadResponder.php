@@ -29,11 +29,11 @@ final class FinalReadResponder implements RespondsFinallyToReadRequest
 
 			(new NotFound())->respond();
 		}
-		catch ( \Throwable $e )
-		{
-			# Something else went wrong, respond with a 500 Internal Server Error
-
-			(new InternalServerError())->respond();
-		}
+//		catch ( \Throwable $e )
+//		{
+//			# Something else went wrong, respond with a 500 Internal Server Error
+//
+//			(new InternalServerError())->respond();
+//		}
 	}
 }

@@ -13,8 +13,8 @@ $beanFactory = new AnnotationBeanFactory(Config::class);
 BeanFactoryRegistry::register($beanFactory);
 
 /** @var SecurityService $securityService */
-$securityService = $beanFactory->get('securityService');
-$securityService->redirect();
+//$securityService = $beanFactory->get('securityService');
+//$securityService->redirect();
 
 //$securityService->getUsers();
 

@@ -7,8 +7,9 @@ use IceHawk\IceHawk\IceHawk;
 use IceHawk\IceHawk\Interfaces\ProvidesCookieData;
 use IceHawk\IceHawk\Routing\Interfaces\BypassesRequest;
 use IceHawk\IceHawk\Defaults\Cookies;
+use Printdeal\Voyager\Application\Endpoints\Start\Read\ListRequestHandler;
 use Printdeal\Voyager\Application\Endpoints\Start\Read\LoginRequestHandler;
-use Printdeal\Voyager\Application\Endpoints\Start\Read\SayHelloRequestHandler;
+use Printdeal\Voyager\Application\Endpoints\Start\Read\NewRequestAuthorisationHandler;
 use Printdeal\Voyager\Application\Endpoints\Start\Write\RequestAuthorisationHandler;
 use Printdeal\Voyager\Application\EventSubscribers\IceHawkInitEventSubscriber;
 use Printdeal\Voyager\Application\EventSubscribers\IceHawkReadEventSubscriber;
@@ -33,6 +34,7 @@ use Printdeal\Voyager\Config\DatabaseProviding;
 use Printdeal\Voyager\Config\EventRouterProviding;
 use Printdeal\Voyager\Config\EventStoreProviding;
 use Printdeal\Voyager\Config\SlackProviding;
+use Printdeal\Voyager\Config\TwigProviding;
 use Printdeal\Voyager\Infrastructure\ESAuthorisationRepository;
 use Printdeal\Voyager\Infrastructure\Service\SlackService;
 use Prooph\EventStore\EventStore;
@@ -52,6 +54,7 @@ class Config
     use CommandBusProviding;
     use CommandRouterProviding;
     use SlackProviding;
+    use TwigProviding;
     use AuthorisationRouterProviding;
 
     use AuthorisationRepositoryProviding;
@@ -67,15 +70,6 @@ class Config
 
     /**
      * @Bean
-     * @return SlackService
-     */
-    public function slackService(): SlackService
-    {
-        return $this->getSlackService();
-    }
-
-    /**
-     * @Bean
      * @return array
      */
 	public function readRoutes(): array
@@ -84,9 +78,11 @@ class Config
 		# For matching the URI you can use the Literal, RegExp or NamedRegExp pattern classes
 
 		return [
-			new ReadRoute( new Literal( '/' ), new SayHelloRequestHandler() ),
-            new ReadRoute( new Literal( '/auth0/callback'), new LoginRequestHandler() )
-		];
+            new ReadRoute( new Literal( '/auth0/callback'), new LoginRequestHandler() ),
+			new ReadRoute( new Literal( '/' ), new ListRequestHandler($this->twig()) ),
+            new ReadRoute( new Literal( '/authorisation/create'), new NewRequestAuthorisationHandler())
+
+        ];
 	}
 
     /**
@@ -98,7 +94,7 @@ class Config
         $this->setAuthorisationRouting($this->commandRouter(), $this->authorisationRepository());
 
 		return [
-			new WriteRoute( new Literal( '/authorisation/create' ), new RequestAuthorisationHandler($this->commandBus()) ),
+			new WriteRoute( new Literal( '/authorisation/submit' ), new RequestAuthorisationHandler($this->commandBus()) ),
 		];
 	}
 
@@ -172,10 +168,31 @@ class Config
      */
     public function databaseConnection(): Connection
     {
-        $config = require_once __DIR__.'/../database.php';
-        return $this->getDatabaseConnection();
+        $config = require_once __DIR__ . '/../config/database.php';
+        return $this->getDatabaseConnection($config);
     }
 
+    /**
+     * @Bean
+     * @return SlackService
+     */
+    public function slackService(): SlackService
+    {
+        $loadedConfig = require_once __DIR__ . '/../config/slack.php';
+        return $this->getSlackService($loadedConfig);
+    }
+
+    /**
+     * @Bean
+     * @return \Twig_Environment
+     */
+    public function twig(): \Twig_Environment
+    {
+        $config = [
+            'pathToTemplates' => __DIR__ . '/Application/Endpoints/Start/Read/Pages'
+        ];
+        return $this->getTwig($config);
+    }
     /**
      * @Bean
      * @return EventRouter
@@ -230,7 +247,7 @@ class Config
      */
     public function securityService() :SecurityService
     {
-        $config = require_once __DIR__.'/../config/auth0.php';
+        $config = require_once __DIR__ . '/../config/auth0.php';
         return new SecurityService($config);
     }
 

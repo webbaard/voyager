@@ -14,7 +14,7 @@ final class DoSomethingRequestHandler implements HandlesPostRequest
 {
 	public function handle( ProvidesWriteRequestData $request )
 	{
-		# This method handles a post request
+		# This method handles a post Request
 
 		# And responds with a 301 redirect back to /
 

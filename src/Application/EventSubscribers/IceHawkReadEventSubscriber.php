@@ -25,17 +25,17 @@ final class IceHawkReadEventSubscriber extends AbstractEventSubscriber
 
 	public function whenHandlingReadRequest( HandlingReadRequestEvent $event )
 	{
-		# This method is called BEFORE the request handler handles the read request
+		# This method is called BEFORE the Request handler handles the read Request
 
-		# You can access the request info via $event->getRequestInfo()
-		# You can access the request input via $event->getRequestInput()
+		# You can access the Request info via $event->getRequestInfo()
+		# You can access the Request input via $event->getRequestInput()
 	}
 
 	public function whenReadRequestWasHandled( ReadRequestWasHandledEvent $event )
 	{
-		# This method is called AFTER the request handler has handled the read request
+		# This method is called AFTER the Request handler has handled the read Request
 
-		# You can access the request info via $event->getRequestInfo()
-		# You can access the request input via $event->getRequestInput()
+		# You can access the Request info via $event->getRequestInfo()
+		# You can access the Request input via $event->getRequestInput()
 	}
 }
