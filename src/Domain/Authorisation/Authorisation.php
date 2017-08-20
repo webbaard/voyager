@@ -3,6 +3,7 @@
 namespace Printdeal\Voyager\Domain\Authorisation;
 
 use Printdeal\Voyager\Domain\Requester\RequesterId;
+use Printdeal\Voyager\Domain\Reviewer\ReviewerId;
 use Printdeal\Voyager\Domain\Signer\Signer;
 use Printdeal\Voyager\Domain\Signer\SignerId;
 use Printdeal\Voyager\Domain\Subject\SubjectId;
@@ -24,19 +25,34 @@ class Authorisation extends AggregateRoot
     private $requesterId;
 
     /**
-     * @var SignerId[]
+     * @var Supplier
      */
-    private $reviewerIds;
+    private $supplier;
 
     /**
-     * @var Approval[]
+     * @var CostCenter;
      */
-    private $approvals;
+    private $costCenter;
 
     /**
-     * @var Rejection[]
+     * @var Commodity
      */
-    private $rejections;
+    private $commodity;
+
+    /**
+     * @var ProjectId
+     */
+    private $projectId;
+
+    /**
+     * @var Amount
+     */
+    private $amount;
+
+    /**
+     * @var DueDate
+     */
+    private $dueDate;
 
     /**
      * @var Description
@@ -44,23 +60,50 @@ class Authorisation extends AggregateRoot
     private $description;
 
     /**
+     * @var SignerId[]
+     */
+    private $reviewerIds = [];
+
+    /**
+     * @var Approval[]
+     */
+    private $approvals = [];
+
+    /**
+     * @var Rejection[]
+     */
+    private $rejections = [];
+
+    /**
      * @var SubjectId[]
      */
-    private $subjectIds;
+    private $subjectIds = [];
 
     /**
      * @param AuthorisationId $authorisationId
      * @param RequesterId $requesterId
+     * @param Supplier $supplier
+     * @param CostCenter $costCenter
+     * @param Commodity $commodity
+     * @param ProjectId $projectId
+     * @param Amount $amount
+     * @param DueDate $dueDate
      * @param Description $description
      * @return Authorisation
      */
-    public static function request(AuthorisationId $authorisationId, RequesterId $requesterId, Description $description): self
+    public static function request(AuthorisationId $authorisationId, RequesterId $requesterId, Supplier $supplier, CostCenter $costCenter, Commodity $commodity, ProjectId $projectId, Amount $amount, DueDate $dueDate, Description $description): self
     {
-        $self = new self(Uuid::uuid4());
+        $self = new self(Uuid::fromString($authorisationId));
         $self->recordThat(
             AuthorisationRequested::from(
                 $authorisationId,
                 $requesterId,
+                $supplier,
+                $costCenter,
+                $commodity,
+                $projectId,
+                $amount,
+                $dueDate,
                 $description
             )
         );
@@ -79,6 +122,26 @@ class Authorisation extends AggregateRoot
             )
         );
     }
+    
+    public function approve(ReviewerId $reviewerId)
+    {
+        $this->recordThat(
+            AuthorisationWasApproved::from(
+                AuthorisationId::fromString($this->id),
+                $reviewerId
+            )
+        );
+    }    
+    
+    public function reject(ReviewerId $reviewerId)
+    {
+        $this->recordThat(
+            AuthorisationWasRejected::from(
+                AuthorisationId::fromString($this->id),
+                $reviewerId
+            )
+        );
+    }
 
     /**
      * @return string
@@ -93,15 +156,63 @@ class Authorisation extends AggregateRoot
      */
     public function id()
     {
-        return $this->aggregateId();
+        return AuthorisationId::fromString($this->id);
     }
 
     /**
      * @return RequesterId
      */
-    public function getRequester(): RequesterId
+    public function requester(): RequesterId
     {
         return $this->requesterId;
+    }
+
+    /**
+     * @return Supplier
+     */
+    public function supplier()
+    {
+        return $this->supplier;
+    }
+
+    /**
+     * @return CostCenter
+     */
+    public function costCenter()
+    {
+        return $this->costCenter;
+    }
+
+    /**
+     * @return Commodity
+     */
+    public function commodity()
+    {
+        return $this->commodity;
+    }
+
+    /**
+     * @return ProjectId
+     */
+    public function projectId()
+    {
+        return $this->projectId;
+    }
+
+    /**
+     * @return Amount
+     */
+    public function amount()
+    {
+        return $this->amount;
+    }
+
+    /**
+     * @return DueDate
+     */
+    public function dueDate()
+    {
+        return $this->dueDate;
     }
 
     /**
@@ -150,6 +261,13 @@ class Authorisation extends AggregateRoot
     protected function whenAuthorisationRequested(AuthorisationRequested $event)
     {
         $this->id = $event->aggregateId();
+        $this->requesterId = $event->requester();
+        $this->supplier = $event->supplier();
+        $this->costCenter = $event->costCenter();
+        $this->commodity = $event->commodity();
+        $this->projectId = $event->projectId();
+        $this->amount = $event->amount();
+        $this->dueDate = $event->dueDate();
         $this->description = $event->description();
     }
 
@@ -159,5 +277,15 @@ class Authorisation extends AggregateRoot
     protected function whenSubjectWasAdded(SubjectWasAdded $event)
     {
         $this->subjectIds[] = $event->subject();
+    }
+    
+    protected function whenAuthorisationWasApproved(AuthorisationWasApproved $event)
+    {
+        $this->approvals[] = $event->reviewer();
+    }    
+    
+    protected function whenAuthorisationWasRejected(AuthorisationWasRejected $event)
+    {
+        $this->rejections[] = $event->reviewer();
     }
 }

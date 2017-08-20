@@ -19,8 +19,8 @@
     <h1>Approve your invoices</h1>
     <nav>
         <ul>
-            <li><a href="list.html.twig">View all requests</a></li>
-            <li><a href="add.html.twig">Add a request</a></li>
+            <li><a href="/">View all requests</a></li>
+            <li><a href="/authorisation/create">Add a request</a></li>
         </ul>
     </nav>
     <div class="logo">
@@ -30,19 +30,19 @@
 </header>
 <section>
     <h2>Add your request</h2>
-    <form class="add-request" action="list.html.twig" method="post">
+    <form class="add-request" action="/authorisation/submit" method="post">
         <label for="supplier">Supplier:</label>
         <select name="supplier">
             <option value="venlo">Venlo</option>
         </select><br>
 
-        <label for"cost_center">Cost center:</label>
+        <label for="cost_center">Cost center:</label>
         <select name="cost_center">
             <option value="option1">option1</option>
         </select><br>
 
-        <label for="gl_account">Commodity:</label>
-        <select name="gl_account">
+        <label for="commodity">Commodity:</label>
+        <select name="commodity">
             <option value="value1">value1</option>
         </select><br>
 
@@ -68,8 +68,8 @@
                 </select><br>
             </div>
         </div>
-
-        <input type="submit" value"Submit">
+        <input type="hidden" name="user_reference" value="{{ userReference }}">
+        <input type="submit" value="Submit">
     </form>
 </section>
 <footer>

@@ -22,11 +22,9 @@ use Rhumsaa\Uuid\Uuid;
  * Class ListRequestHandler
  * @package Printdeal\Voyager\Application\Endpoints\Start\Read
  */
-final class ListRequestHandler implements HandlesGetRequest
+final class DetailAuthorisationHandler implements HandlesGetRequest
 {
     private $twig;
-
-    private $authorisationOverviewRepository;
 
     private $authorisationRepository;
 
@@ -34,37 +32,21 @@ final class ListRequestHandler implements HandlesGetRequest
 
     public function __construct(
         \Twig_Environment $twig,
-        AuthorisationOverviewRepository $authorisationOverviewRepository,
         AuthorisationRepository $authorisationRepository,
         string $userReference
     ) {
         $this->twig = $twig;
-        $this->authorisationOverviewRepository = $authorisationOverviewRepository;
         $this->authorisationRepository = $authorisationRepository;
         $this->userReference = $userReference;
     }
 
     public function handle( ProvidesReadRequestData $request )
 	{
-        $overview = [
-            'requested' =>[],
-            'approvable' => []
-        ];
-	    $overviewEvent = $this->authorisationOverviewRepository->get(Uuid::fromString($this->userReference));
-
-	    foreach ($overviewEvent->requestedAuthorisations() as $authorisation) {
-	        $overview['requested'][] = $this->authorisationRepository->get(Uuid::fromString($authorisation));
-        }
-
-        foreach ($overviewEvent->approvableAuthorisations() as $authorisation) {
-	        $overview['approvable'][] = $this->authorisationRepository->get(Uuid::fromString($authorisation));
-         }
-
-        $template = $this->twig->load('Request/list.html.twig');
-
+        $template = $this->twig->load('Request/detail.html.twig');
 		echo $template->render(
 		    [
-		        'overview' => $overview
+		        'userReference' => $this->userReference,
+		        'authorisation' => $this->authorisationRepository->get(Uuid::fromString($request->getInput()->get('authorisationId')))
             ]
         );
 	}

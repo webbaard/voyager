@@ -7,9 +7,13 @@ use IceHawk\IceHawk\IceHawk;
 use IceHawk\IceHawk\Interfaces\ProvidesCookieData;
 use IceHawk\IceHawk\Routing\Interfaces\BypassesRequest;
 use IceHawk\IceHawk\Defaults\Cookies;
+use IceHawk\IceHawk\Routing\Patterns\RegExp;
+use Printdeal\Voyager\Application\Endpoints\Start\Read\DetailAuthorisationHandler;
 use Printdeal\Voyager\Application\Endpoints\Start\Read\ListRequestHandler;
 use Printdeal\Voyager\Application\Endpoints\Start\Read\LoginRequestHandler;
 use Printdeal\Voyager\Application\Endpoints\Start\Read\NewRequestAuthorisationHandler;
+use Printdeal\Voyager\Application\Endpoints\Start\Write\ApproveAuthorisationHandler;
+use Printdeal\Voyager\Application\Endpoints\Start\Write\RejectAuthorisationHandler;
 use Printdeal\Voyager\Application\Endpoints\Start\Write\RequestAuthorisationHandler;
 use Printdeal\Voyager\Application\EventSubscribers\IceHawkInitEventSubscriber;
 use Printdeal\Voyager\Application\EventSubscribers\IceHawkReadEventSubscriber;
@@ -26,6 +30,8 @@ use bitExpert\Disco\Annotations\Configuration;
 use bitExpert\Disco\BeanFactoryRegistry;
 use IceHawk\IceHawk\Defaults\RequestInfo;
 use IceHawk\IceHawk\Interfaces\ProvidesRequestInfo;
+use Printdeal\Voyager\Config\AuthorisationOverviewRepositoryProviding;
+use Printdeal\Voyager\Config\AuthorisationOverviewRouterProviding;
 use Printdeal\Voyager\Config\AuthorisationRepositoryProviding;
 use Printdeal\Voyager\Config\AuthorisationRouterProviding;
 use Printdeal\Voyager\Config\CommandBusProviding;
@@ -33,9 +39,13 @@ use Printdeal\Voyager\Config\CommandRouterProviding;
 use Printdeal\Voyager\Config\DatabaseProviding;
 use Printdeal\Voyager\Config\EventRouterProviding;
 use Printdeal\Voyager\Config\EventStoreProviding;
+use Printdeal\Voyager\Config\MessageProviding;
 use Printdeal\Voyager\Config\SlackProviding;
 use Printdeal\Voyager\Config\TwigProviding;
-use Printdeal\Voyager\Infrastructure\ESAuthorisationRepository;
+use Printdeal\Voyager\Config\UserReferenceProviding;
+use Printdeal\Voyager\Domain\Authorisation\AuthorisationRepository;
+use Printdeal\Voyager\Domain\AuthorisationOverview\AuthorisationOverviewRepository;
+use Printdeal\Voyager\Infrastructure\Service\SlackMessager;
 use Printdeal\Voyager\Infrastructure\Service\SlackService;
 use Prooph\EventStore\EventStore;
 use Prooph\ServiceBus\CommandBus;
@@ -55,9 +65,14 @@ class Config
     use CommandRouterProviding;
     use SlackProviding;
     use TwigProviding;
+    use UserReferenceProviding;
+    use MessageProviding;
+
     use AuthorisationRouterProviding;
+    use AuthorisationOverviewRouterProviding;
 
     use AuthorisationRepositoryProviding;
+    use AuthorisationOverviewRepositoryProviding;
 
     /**
      * @Bean
@@ -68,19 +83,39 @@ class Config
         return RequestInfo::fromEnv();
     }
 
+    private function setCommandRouting()
+    {
+        $this->setAuthorisationRouting($this->commandRouter(), $this->slackMessager(), $this->authorisationRepository());
+        $this->setAuthorisationOverviewRouting($this->commandRouter(), $this->authorisationOverviewRepository());
+    }
+
+
     /**
      * @Bean
      * @return array
      */
 	public function readRoutes(): array
 	{
-		# Define your read routes (GET / HEAD) here
-		# For matching the URI you can use the Literal, RegExp or NamedRegExp pattern classes
-
-		return [
+	    $this->setCommandRouting();
+        return [
             new ReadRoute( new Literal( '/auth0/callback'), new LoginRequestHandler() ),
-			new ReadRoute( new Literal( '/' ), new ListRequestHandler($this->twig(), $this->authorisationRepository()) ),
-            new ReadRoute( new Literal( '/authorisation/create'), new NewRequestAuthorisationHandler())
+            new ReadRoute( new Literal( '/' ), new ListRequestHandler(
+			    $this->twig(),
+                $this->authorisationOverviewRepository(),
+                $this->authorisationRepository(),
+                $this->userReference()
+            ) ),
+            new ReadRoute( new Literal( '/authorisation/create'), new NewRequestAuthorisationHandler(
+                $this->securityService(),
+                $this->databaseConnection(),
+                $this->commandBus(),
+                $this->twig()
+            ) ),
+            new ReadRoute( new RegExp( '#^/authorisation/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}+)$#', [ 'authorisationId' ]), new DetailAuthorisationHandler(
+                $this->twig(),
+                $this->authorisationRepository(),
+                $this->userReference()
+            ))
 
         ];
 	}
@@ -91,10 +126,12 @@ class Config
      */
 	public function writeRoutes(): array
 	{
-        $this->setAuthorisationRouting($this->commandRouter(), $this->authorisationRepository());
+        $this->setCommandRouting();
 
 		return [
 			new WriteRoute( new Literal( '/authorisation/submit' ), new RequestAuthorisationHandler($this->commandBus()) ),
+			new WriteRoute( new Literal( '/authorisation/approve' ), new ApproveAuthorisationHandler($this->commandBus(), $this->authorisationRepository()) ),
+			new WriteRoute( new Literal( '/authorisation/reject' ), new RejectAuthorisationHandler($this->commandBus(), $this->authorisationRepository()) ),
 		];
 	}
 
@@ -137,11 +174,20 @@ class Config
 
     /**
      * @Bean
-     * @return ESAuthorisationRepository
+     * @return AuthorisationRepository
      */
-    public function authorisationRepository(): ESAuthorisationRepository
+    public function authorisationRepository(): AuthorisationRepository
     {
         return $this->getAuthorisationRepository($this->eventStore());
+    }
+
+    /**
+     * @Bean
+     * @return AuthorisationOverviewRepository
+     */
+    public function authorisationOverviewRepository(): AuthorisationOverviewRepository
+    {
+        return $this->getAuthorisationOverviewRepository($this->eventStore());
     }
 
     /**
@@ -164,6 +210,15 @@ class Config
 
     /**
      * @Bean
+     * @return string
+     */
+    public function userReference(): string
+    {
+        return $this->getUserReference($this->securityService(), $this->databaseConnection(), $this->commandBus());
+    }
+
+    /**
+     * @Bean
      * @return Connection
      */
     public function databaseConnection(): Connection
@@ -180,6 +235,18 @@ class Config
     {
         $loadedConfig = require_once __DIR__ . '/../config/slack.php';
         return $this->getSlackService($loadedConfig);
+    }
+
+    /**
+     * @Bean
+     * @return SlackMessager
+     */
+    public function slackMessager(): SlackMessager
+    {
+        return $this->getMessageProvider(
+            $this->slackService(),
+            $this->databaseConnection()
+        );
     }
 
     /**
