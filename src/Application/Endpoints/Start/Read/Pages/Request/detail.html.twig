@@ -19,8 +19,8 @@
     <h1>Approve your invoices</h1>
     <nav>
         <ul>
-            <li><a href="list.html.twig">View all requests</a></li>
-            <li><a href="add.html.twig">Add a request</a></li>
+            <li><a href="/">View all requests</a></li>
+            <li><a href="/authorisation/create">Add a request</a></li>
         </ul>
     </nav>
     <div class="logo">
@@ -33,35 +33,41 @@
     <table class="detail-page-table">
         <tr>
             <td>Supplier:</td>
-            <td>Venlo plant</td>
+            <td>{{ authorisation.supplier }}</td>
         </tr>
         <tr>
             <td>Cost Center:</td>
-            <td>623101 - IT Dev PPG2</td>
+            <td>{{ authorisation.costCenter }}</td>
         </tr>
         <tr>
-            <td>GL Account:</td>
-            <td>720002 - Non Travel meals & entertainment</td>
+            <td>Commodity:</td>
+            <td>{{ authorisation.commodity }}</td>
         </tr>
         <tr>
             <td>Project ID:</td>
-            <td>-</td>
+            <td>{{ authorisation.projectId }}</td>
         </tr>
         <tr>
             <td>Amount (excl. VAT):</td>
-            <td>&euro; 50.00</td>
+            <td>&euro; {{ authorisation.amount }}</td>
         </tr>
         <tr>
             <td>Due date:</td>
-            <td>17 august 2017</td>
+            <td>{{ authorisation.dueDate|date("d-m-Y") }}</td>
         </tr>
         <tr>
             <td>Description:</td>
-            <td>the description ...</td>
+            <td>{{ authorisation.description }}</td>
         </tr>
     </table>
-    <form class="review-request" action="list.html.twig" method="post">
-        <input type="submit" name="declined" value="Declined" style="color:white; font-weight:bold; background-color:red">
+    <form class="review-request" action="/authorisation/reject" method="post">
+        <input type="hidden" name="authorisation" value="{{ authorisation.id }}">
+        <input type="hidden" name="user_reference" value="{{ userReference }}">
+        <input type="submit" name="reject" value="Reject" style="color:white; font-weight:bold; background-color:red">
+    </form>
+    <form class="review-request" action="/authorisation/approve" method="post">
+        <input type="hidden" name="authorisation" value="{{ authorisation.id }}">
+        <input type="hidden" name="user_reference" value="{{ userReference }}">
         <input type="submit" name="approved" value="Approved" style="color:white; font-weight:bold; background-color:green">
     </form>
 </section>

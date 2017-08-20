@@ -21,10 +21,13 @@ class SlackService
      */
     public function __construct(string $slackToken) {
         $this->slackToken = $slackToken;
+        try {
+            $curlInteractor = new CurlInteractor;
+            $curlInteractor->setResponseFactory(new SlackResponseFactory);
+            $this->commander = new Commander($this->slackToken, $curlInteractor);
+        } catch (\Exception $exception){
 
-        $curlInteractor = new CurlInteractor;
-        $curlInteractor->setResponseFactory(new SlackResponseFactory);
-        $this->commander = new Commander($this->slackToken, $curlInteractor);
+        }
     }
 
     /**

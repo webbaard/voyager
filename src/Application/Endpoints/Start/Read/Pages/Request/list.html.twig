@@ -29,7 +29,7 @@
 
 </header>
 <section>
-    <h2>Requests overview</h2>
+    <h2>Requests sdfgsdfgsdgsdfgoverview</h2>
     <p>View here your requests and the requests that need your approval</p>
 
     <h3>My requests</h3>
@@ -40,21 +40,19 @@
             <th>Supplier</th>
             <th>Amount</th>
             <th>Approved</th>
+            <th>Rejected</th>
         </tr>
         </thead>
         <tbody>
-        <tr>
-            <td><a href="detail.html.twig">142</a></td>
-            <td>{{ test }}</td>
-            <td>&euro; 1050,00</td>
-            <td>No</td>
-        </tr>
-        <tr>
-            <td><a href="detail.html.twig">143</a></td>
-            <td>Kabels</td>
-            <td>&euro; 880,00</td>
-            <td>No</td>
-        </tr>
+        {% for authorisation in overview.requested %}
+            <tr>
+                <td><a href="/authorisation/{{ authorisation.id }}">{{ authorisation.id }}</a></td>
+                <td>{{ authorisation.supplier }}</td>
+                <td>&euro; {{ authorisation.amount }}</td>
+                <td>{{ authorisation.approvals|length }}</td>
+                <td>{{ authorisation.rejections|length }}</td>
+            </tr>
+        {% endfor %}
         </tbody>
     </table>
 
@@ -66,33 +64,19 @@
             <th>Supplier</th>
             <th>Amount</th>
             <th>Approved</th>
+            <th>Rejected</th>
         </tr>
         </thead>
         <tbody>
-        <tr>
-            <td><a href="detail.html.twig">123</a></td>
-            <td>Control Media</td>
-            <td>&euro; 544,00</td>
-            <td>No</td>
-        </tr>
-        <tr>
-            <td><a href="detail.html.twig">124</a></td>
-            <td>De Groot</td>
-            <td>&euro; 669,00</td>
-            <td>No</td>
-        </tr>
-        <tr>
-            <td><a href="detail.html.twig">125</a></td>
-            <td>Verhaag</td>
-            <td>&euro; 540,00</td>
-            <td>No</td>
-        </tr>
-        <tr>
-            <td><a href="detail.html.twig">126</a></td>
-            <td>Boels</td>
-            <td>&euro; 350,00</td>
-            <td>No</td>
-        </tr>
+        {% for authorisation in overview.approvable %}
+            <tr>
+                <td><a href="/authorisation/{{ authorisation.id }}">{{ authorisation.id }}</a></td>
+                <td>{{ authorisation.supplier }}</td>
+                <td>&euro; {{ authorisation.amount }}</td>
+                <td>{{ authorisation.approvals|length }}</td>
+                <td>{{ authorisation.rejections|length }}</td>
+            </tr>
+        {% endfor %}
         </tbody>
     </table>
 </section>

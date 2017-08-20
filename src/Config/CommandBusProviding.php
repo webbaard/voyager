@@ -18,7 +18,7 @@ trait CommandBusProviding
     {
         // Command bus setup
         $commandBus = new CommandBus();
-        $transactionManager = new TransactionManager();
+        $transactionManager = new TransactionManager($eventStore);
 
         $transactionManager->setUp($eventStore);
         $commandBus->utilize($transactionManager);
