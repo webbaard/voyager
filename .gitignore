@@ -1,6 +1,6 @@
 .idea/
 .vagrant/
 vendor/
-config/
+/config
 composer.lock
 
